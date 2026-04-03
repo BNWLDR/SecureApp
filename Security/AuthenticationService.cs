@@ -6,6 +6,7 @@ public class AuthenticationService(IUserRepository userRepository, IPasswordHash
 {
     public async Task<bool> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default)
     {
+        // Fetch by username and verify a bcrypt hash; never compare plaintext passwords.
         var user = await userRepository.GetUserAuthByUsernameAsync(username, cancellationToken);
         if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
         {
@@ -23,6 +24,7 @@ public class AuthenticationService(IUserRepository userRepository, IPasswordHash
             throw new InvalidOperationException("Username is already registered.");
         }
 
+        // Bootstrap rule: first account becomes Admin so the app has an initial operator.
         var currentUserCount = await userRepository.CountUsersAsync(cancellationToken);
         var assignedRole = currentUserCount == 0 ? AppRoles.Admin : AppRoles.User;
 

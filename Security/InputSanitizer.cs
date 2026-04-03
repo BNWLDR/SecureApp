@@ -23,6 +23,7 @@ public partial class InputSanitizer : IInputSanitizer
         var trimmed = input.Trim();
         var builder = new StringBuilder(trimmed.Length);
 
+        // Username uses a strict allowlist to avoid script/query control characters.
         foreach (var c in trimmed)
         {
             if (char.IsLetterOrDigit(c) || c is '_' or '.' or '-')
@@ -59,6 +60,7 @@ public partial class InputSanitizer : IInputSanitizer
             return string.Empty;
         }
 
+        // Defense-in-depth helper for any value that might be rendered as text in views.
         return HtmlEncoder.Default.Encode(input);
     }
 

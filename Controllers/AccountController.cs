@@ -21,6 +21,7 @@ public class AccountController(SecureApp.Security.IAuthenticationService authent
         var originalUsername = model.Username;
         var originalEmail = model.Email;
 
+        // Normalize hostile characters before business validation/persistence.
         model.Username = inputSanitizer.SanitizeUsername(model.Username);
         model.Email = inputSanitizer.SanitizeEmail(model.Email);
 
@@ -58,6 +59,7 @@ public class AccountController(SecureApp.Security.IAuthenticationService authent
     public async Task<IActionResult> Login(LoginInputModel model, CancellationToken cancellationToken)
     {
         var originalUsername = model.Username;
+        // Username is sanitized before lookup to keep auth queries safe and consistent.
         model.Username = inputSanitizer.SanitizeUsername(model.Username);
 
         if (!string.Equals(originalUsername, model.Username, StringComparison.Ordinal))

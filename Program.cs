@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// Cookie auth keeps the sample self-contained without an external identity provider.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -23,6 +24,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    // Ensure required tables/columns exist before serving requests.
     var initializer = scope.ServiceProvider.GetRequiredService<IDatabaseInitializer>();
     await initializer.InitializeAsync();
 }

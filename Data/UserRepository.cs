@@ -15,6 +15,7 @@ public class UserRepository(ISqliteConnectionFactory connectionFactory) : IUserR
         await connection.OpenAsync(cancellationToken);
 
         await using var command = connection.CreateCommand();
+        // Always use parameters for user-controlled values to prevent SQL injection.
         command.CommandText = "INSERT INTO Users (Username, Email, PasswordHash, Role) VALUES (@username, @email, @passwordHash, @role);";
         command.Parameters.Add(new SqliteParameter("@username", username));
         command.Parameters.Add(new SqliteParameter("@email", email));
@@ -51,6 +52,7 @@ public class UserRepository(ISqliteConnectionFactory connectionFactory) : IUserR
         await connection.OpenAsync(cancellationToken);
 
         await using var command = connection.CreateCommand();
+        // Escape SQL LIKE wildcards so searching remains literal and predictable.
         command.CommandText = "SELECT UserID, Username, Email FROM Users WHERE Username LIKE @search ESCAPE '\\' ORDER BY UserID;";
         command.Parameters.Add(new SqliteParameter("@search", $"%{EscapeLikePattern(searchTerm)}%"));
 
@@ -70,6 +72,7 @@ public class UserRepository(ISqliteConnectionFactory connectionFactory) : IUserR
 
     private static string EscapeLikePattern(string input)
     {
+        // Escape the wildcard/control characters recognized by SQL LIKE.
         return input
             .Replace("\\", "\\\\", StringComparison.Ordinal)
             .Replace("%", "\\%", StringComparison.Ordinal)
